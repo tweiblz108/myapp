@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dio.dart';
 
 // flutter padding 不计入 height 中
+
 
 const bold24Rotobo = TextStyle(
     fontFamily: 'Roboto',
@@ -113,14 +115,29 @@ class TabButton extends StatelessWidget {
   }
 }
 
-class IndexPage extends StatelessWidget {
+class IndexPageState extends State<IndexPage> {
+  List<Map<String, dynamic>> _orders = [];
+
+  void query() async {
+    var response = await dio.get('/orders', queryParameters: {
+      'filter': {
+        'except_statuses': [9, -1, -2]
+      },
+      'pageinfo': {
+        'limit': 100
+      }
+    });
+
+    print(response.data);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
         child: Column(
           children: <Widget>[
             Header(
-              action: Icon(Icons.refresh),
+              action: GestureDetector(child: Icon(Icons.refresh), onTap: query,),
               title: '订单',
             ),
             Expanded(
@@ -133,10 +150,16 @@ class IndexPage extends StatelessWidget {
   }
 }
 
+class IndexPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => IndexPageState();
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: alice.getNavigatorKey(),
       home: Scaffold(
         body: IndexPage(),
       ),
